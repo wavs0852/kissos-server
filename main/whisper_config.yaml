@@ -1,0 +1,8 @@
+model: "openai/whisper-large-v3-turbo"
+max_model_len: 448
+max_num_seqs: 24
+limit_mm_per_prompt:
+  audio: 1
+dtype: "float16"
+gpu_memory_utilization: 0.18
+kv_cache_memory_bytes: 4831838208
