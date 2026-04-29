@@ -1,13 +1,29 @@
 ## Architecture Overview
 
-### Blueprint
 ![vLLM LID](./imgs/Architecture%20Mechanism.png)
 
 ---
 
-### Server
-**Nginx**는 앞단에 배치되어 웹/프록시 서버로 기능한다.
-- Speaker의 WebSocket 요청은 프록시를 통과하여 서버 내부의 Ingress에 도착하고 Ingress는 내부의 WebSocket 엔드포인트에 요청을 전달하여 Socket Handler를 깨운다.  
+## API Endpoint
+
+**api/streaming** : WebSocket
+ - Speaker는 Websocket을 이용하여 서버와 양방향 통신을 맺는다.   
+ 연결 수립의 주도권은 Speaker 측에 있으며, 엔드포인트는 Speaker 측으로부터 발신되는 오디오 데이터를 수신받고 세션 정보, 에러 및 연결 상황 등의 상태 정보를 발신한다.
+
+**api/broadcast** : ServerSideEvent    
+ - Listener는 SSE를 이용하여 서버와 단방향 통신을 맺는다.   
+ 연결 수립의 주도권은 Listener 측에 있으며, 엔드포인트는 연결 수립 이후 일방적으로 전사 및 번역 데이터를 Listener에게 발신한다. 
+  
+**api/auth**: Get | Post
+ - Speaker 측의 Extension이 로그인/회원가입시에 Oauth2를 위해 동작하는 엔드포인트이다.    
+ 내부적으로 /providers와 /exchange 엔드포인트를 가진다.
+
+---
+
+## Server Mechanism 
+(수정필요)
+
+모든 api 요청은 Nginx 프록시를 통과하여 서버 내부의 Ingress에 도착하고 Ingress는 내부의 WebSocket 엔드포인트에 요청을 전달하여 Socket Handler를 깨운다.  
 - Listener의 HTTP 요청은 /entrance에 도착하여 Nginx의 프론트엔드와 백엔드를 깨운다. /entrance는 세션 ID를 입력받고 서버에서 해당 세션이 진행중인지를 확인한다. 만약 세션이 진행중이라면 서버 내부의 Ingress와 SSE 연결을 수립하여 SSE Handler를 깨운다. 이때 유저는 /session/{sessionID} 페이지로 리디렉션되어 전사/번역 화면으로 이동한다.
 
 **Ray Serve**는 대규모 추론 환경을 간편하게 구성할 수 있도록 하는 프레임워크로 진입점과 워커를 비롯한 여러 독립적인 프로세스를 GIL을 우회해 통합적으로 제어하는 데 탁월하다. 프로세스는 진입점이자 세션 매니지먼트를 담당하는 Ingress Server와 모델 워커로 동작하는 DeployWhisper, 그리고 DeployTranslator(모델 미정)로 구성된다. 
@@ -42,7 +58,7 @@ SSE 연결을 사용하며 프론트엔드와 백엔드는 HTTP 연결 수립 �
 ## How to use
 
 ### Environment Setup
-
+(수정필요)
 ```bash
 # with pyproject.toml
 uv sync
@@ -55,7 +71,8 @@ uv sync
 uv add "ray[serve]==2.54.0" "vllm==0.17.0" redis pyyaml
 ```
 
-### Start Redis Container
+### Start Redis Container 
+(서버 환경에서는 실행하지 않아도 됨)
 
 ```bash
 docker run -d \
@@ -69,7 +86,7 @@ docker run -d \
 ```bash
 source .venv/bin/activate
 cd ./main
-serve run serve_main:runner
+serve run serve_config.yaml
 ```
 
 ### Custom vLLM logic
@@ -113,12 +130,7 @@ def mask_logits_for_LID(self, scheduler_output, logits) -> None:
 ```
 
 
-## About Ray Serve
+## Architecture extended from ray serve
 
-### Architecture Comparison
 ![vLLM LID](./imgs/Architecture%20Comparison.png)
 
-### Key concepts of Ray Serve
-되로록 아래의 내용을 숙지할 것
-- Ray: https://docs.ray.io/en/latest/ray-core/key-concepts.html
-- Ray Serve: https://docs.ray.io/en/latest/serve/key-concepts.html

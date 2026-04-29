@@ -8,5 +8,5 @@ wheels/
 
 # Virtual environments
 .venv
-
+.commit_message.txt
 

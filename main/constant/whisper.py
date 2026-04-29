@@ -1,5 +1,4 @@
-
-LANG_IDS = {
+WHISPER_LANG_IDS = {
     'Afrikaans': 50327,
     'Arabic': 50272,
     'Armenian': 50312,
@@ -58,3 +57,6 @@ LANG_IDS = {
     'Vietnamese': 50278,
     'Welsh': 50297
     }
+
+WHISPER_LANG_IDS_REVERSED = {v: k for k, v in WHISPER_LANG_IDS.items()}
+WHISPER_LANG_ID_TAGS = WHISPER_LANG_IDS.values()
